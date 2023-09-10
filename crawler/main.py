@@ -21,7 +21,7 @@ def get_lottory2():
         numbers = trs[4].text.strip().split()[1:]
         big_lottory = ",".join(numbers[:-1]) + f"  特別號：{numbers[-1]}"
         date = ",".join(trs[1].text.strip().split()[:2])
-        strmessage = f"期數/日期: {date}\n{big_lottory}"
+        strmessage = f"期別數/日期: {date}\n{big_lottory}"
         print(strmessage)
 
         return strmessage

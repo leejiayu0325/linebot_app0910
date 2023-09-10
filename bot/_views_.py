@@ -13,16 +13,14 @@ from linebot.models import MessageEvent, TextSendMessage, ImageSendMessage
 
 import random
 from crawler.main import get_lottory, get_lottory2
-from crawler.train import get_stations, get_train_data2
+from crawler.train_main import get_stations, get_train_data
 
 line_bot_api = LineBotApi(settings.LINE_CHANNEL_ACCESS_TOKEN)
 parse = WebhookParser(settings.LINE_CHANNEL_SECRET)
 
 stations = get_stations()
 menu = {i + 1: station for i, station in enumerate(stations)}
-menu_str = ""
-train_str = ""
-stations = {}
+print(stations)
 
 
 def index(request):
@@ -31,24 +29,8 @@ def index(request):
     return HttpResponse(f"{now}<H1>歡迎光臨<br>我的聊天機器人！！！</H1>")
 
 
-def get_menu():
-    global menu_str, stations
-    if menu_str == "":
-        stations = get_stations()
-        menu = {i + 1: station for i, station in enumerate(stations)}
-        count = 0
-        for k, v in menu.items():
-            menu_str += "{:2}.{:4}".format(k, v)
-            count += 1
-            if count % 4 == 0:
-                menu_str += "\n"
-
-
 @csrf_exempt
 def callback(request):
-    global menu_str, stations
-    get_menu()
-    print(menu_str)
     if request.method == "POST":
         signature = request.META["HTTP_X_LINE_SIGNATURE"]
         body = request.body.decode("utf-8")
@@ -61,16 +43,7 @@ def callback(request):
         for event in events:
             if isinstance(event, MessageEvent):
                 text = event.message.text
-                if text == "1":
-                    text = menu_str
-
-                if text == "2":
-                    # 1000-台北
-                    text = get_train_data2(
-                        stations["臺北"], stations["基隆"], "2023/09/10", "12:00", "23:59"
-                    )
-                    print(text)
-                message = TextSendMessage(text=text)
+                message = TextSendMessage(text="我不知道你在說甚麼")
 
                 print(event.message.text)
                 try:

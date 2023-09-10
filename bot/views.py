@@ -70,32 +70,42 @@ def callback(request):
                         step = 0
                         messa = ""
                         text = "感謝您的使用...."
-                    elif text == "star" and step == 0:
+                    elif text == "0" and step == 0:
                         text = menu_str + "\n\n請輸入起始站點："
                         step += 1
                     elif step == 1:
                         # {1:台北}
                         startStation = menu[eval(text)]
-                        messa = f"始站點：{startStation}"
+                        messa = f"起始站點：{startStation}"
                         text = messa + "\n\n請輸入終止站點："
                         step += 1
                     elif step == 2:
                         endStation = menu[eval(text)]
                         messa += f"\n終止站點：{endStation}"
-                        text = messa + "\n\n請輸入乘車時間(2023/08/30)："
+                        text = messa + "\n\n請輸入乘車時間(2023/08/30；'.':當天日期)："
                         step += 1
                     elif step == 3:
-                        rideDate = text
+                        if text == ".":
+                            rideDate = datetime.now().strftime("%Y/%m/%d")
+                            print(rideDate, step)
+                        else:
+                            rideDate = text
                         messa += f"\n乘車時間：{rideDate}"
-                        text = messa + f"\n\n請輸入起始時間(00:00)："
+                        text = messa + f"\n\n請輸入起始時間(00:00)[＂.＂-現在時間]："
                         step += 1
                     elif step == 4:
-                        startTime = text
+                        if text == ".":
+                            startTime = datetime.now().strftime("%H:%M")
+                        else:
+                            startTime = text
                         messa += f"\n起始時間：{startTime}"
-                        text = messa + f"\n\n請輸入終止時間(23:59)："
+                        text = messa + f"\n\n請輸入終止時間(10:59)[＂.＂-最後時間(23:59)]："
                         step += 1
                     elif step == 5:
-                        endTime = text
+                        if text == ".":
+                            endTime = "23:59"
+                        else:
+                            endTime = text
                         messa += f"\n終止時間：{endTime}\n\n"
                         text = messa + get_train_data2(
                             stations[startStation],

@@ -22,7 +22,10 @@ stations = get_stations()
 menu = {i + 1: station for i, station in enumerate(stations)}
 menu_str = ""
 train_str = ""
-stations = {}
+messa = ""
+menu, stations = {}, {}
+step = 0
+startStation, endStation, rideDate, startTime, endTime = "", "", "", "", ""
 
 
 def index(request):
@@ -32,7 +35,7 @@ def index(request):
 
 
 def get_menu():
-    global menu_str, stations
+    global menu_str, stations, menu
     if menu_str == "":
         stations = get_stations()
         menu = {i + 1: station for i, station in enumerate(stations)}
@@ -46,9 +49,10 @@ def get_menu():
 
 @csrf_exempt
 def callback(request):
-    global menu_str, stations
+    global messa, menu, menu_str, stations, step, startStation, endStation, rideDate, startTime, endTime
     get_menu()
     print(menu_str)
+
     if request.method == "POST":
         signature = request.META["HTTP_X_LINE_SIGNATURE"]
         body = request.body.decode("utf-8")
@@ -61,15 +65,52 @@ def callback(request):
         for event in events:
             if isinstance(event, MessageEvent):
                 text = event.message.text
-                if text == "1":
-                    text = menu_str
+                try:
+                    if text == "exit":
+                        step = 0
+                        messa = ""
+                        text = "感謝您的使用...."
+                    elif text == "star" and step == 0:
+                        text = menu_str + "\n\n請輸入起始站點："
+                        step += 1
+                    elif step == 1:
+                        # {1:台北}
+                        startStation = menu[eval(text)]
+                        messa = f"始站點：{startStation}"
+                        text = messa + "\n\n請輸入終止站點："
+                        step += 1
+                    elif step == 2:
+                        endStation = menu[eval(text)]
+                        messa += f"\n終止站點：{endStation}"
+                        text = messa + "\n\n請輸入乘車時間(2023/08/30)："
+                        step += 1
+                    elif step == 3:
+                        rideDate = text
+                        messa += f"\n乘車時間：{rideDate}"
+                        text = messa + f"\n\n請輸入起始時間(00:00)："
+                        step += 1
+                    elif step == 4:
+                        startTime = text
+                        messa += f"\n起始時間：{startTime}"
+                        text = messa + f"\n\n請輸入終止時間(23:59)："
+                        step += 1
+                    elif step == 5:
+                        endTime = text
+                        messa += f"\n終止時間：{endTime}\n\n"
+                        text = messa + get_train_data2(
+                            stations[startStation],
+                            stations[endStation],
+                            rideDate,
+                            startTime,
+                            endTime,
+                        )
+                        step = 0
+                        messa = ""
+                        text += "\n感謝您的使用！"
+                except Exception as e:
+                    print(e)
+                    text = "輸入不正確，請重新輸入...."
 
-                if text == "2":
-                    # 1000-台北
-                    text = get_train_data2(
-                        stations["臺北"], stations["基隆"], "2023/09/10", "12:00", "23:59"
-                    )
-                    print(text)
                 message = TextSendMessage(text=text)
 
                 print(event.message.text)
